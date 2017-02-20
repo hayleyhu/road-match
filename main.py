@@ -1,46 +1,30 @@
 from link import *
 from probe import *
-from math import radians, cos, sin, asin, sqrt
+from math import *
+import scipy.stats
+from haversine import haversine
 
-AVG_EARTH_RADIUS = 6371000  # in m
-
-
-def probeToLinkDist(p_lat, p_long, ref, nref):
-	ref_lat = ref[0]
-	ref_long = ref[1]
-	nref_lat = nref[0]
-	nref_long = nref[1]
-
-	y = sin(p_long - ref_long) * cos(p_lat)
-	x = cos(ref_lat) * sin(p_lat) - sin(ref_lat) * cos(p_lat) * cos(p_lat - ref_lat)
-	bearing1 = map(radians, atan2(y, x))
-	bearing1 = 360 - ((bearing1 + 360) % 360)
-
-	y2 = sin(nref_long - ref_long) * cos(nref_lat)
-	x2 = cos(ref_lat) * sin(nref_lat) - sin(ref_lat) * cos(nref_lat) * cos(nref_lat - ref_lat)
-	bearing2 = map(radians, atan2(y2, x2))
-	bearing2 = 360 - ((bearing2 + 360) % 360)
-
-	ref_Rads = map(radians, ref_lat);
-	p_Rads = map(radians, p_lat)
-	dLon = map(radians, p_long - ref_long)
-
-	distanceAC = acos(sin(ref_Rads) * sin(p_Rads)+cos(ref_Rads)*cos(p_Rads)*cos(dLon)) * AVG_EARTH_RADIUS
-	min_distance = fabs(asin(sin(distanceAC/AVG_EARTH_RADIUS)*sin(map(radians, bearing1)-map(radians, bearing2))) * AVG_EARTH_RADIUS)
-	return min_distance
+def get_candidates(probe_pt, link_list, r):
+	probe_lat, probe_long = probe_pt.getPos()
+	min_dist = 1000000000000
+	for curr_link in link_list:
+		dist, grepLat, grepLong, linkID = curr_link.pointToLink(probe_pt)
+		if dist < min_dist:
+			min_dist = dist
+		if dist < r:
+			# min_dist = dist
+			# probe_pt.linkPVID = curr_link.linkPVID
+			prob = scipy.stats.norm(0, 20).pdf(dist)
+			probe_pt.grepPoints.append([dist, prob, grepLat, grepLong, linkID])
+	
+	# for curr_link in link_list:
+	# 	if curr_link.linkPVID == probe_pt.linkPVID:
+	# 		curr_link.candidates.append(probe_pt)
+	if len(probe_pt.grepPoints) < 1:
+		print "no candidate",
+		print min_dist 
 
 
-def getCandidates(probe_pt, link_list, r):
-	candidate_list = list()
-	probe_lat = probe_pt.latitude
-	probe_long = probe_pt.longitude
-	for x in link_list:
-		ref_pt = x.RefNode
-		nref_pt = x.NrefNode
-		dist = probeToLinkDist(probe_lat, probe_long, ref_pt, nref_pt)
-		if(dist < r):
-			candidate_list.append(x)
-	return candidate_list
 		
 if __name__ == "__main__":
 
@@ -48,16 +32,72 @@ if __name__ == "__main__":
 	all_probes = list()
 	link_file = "Partition6467LinkData.csv"
 	probe_file = "Partition6467ProbePoints.csv"
-	
-	with open(probe_file) as f:
-		for line in f:
-			print line
-			curr_probe = Probe(line)
-			all_probes.append(curr_probe)
-			
+
+
 	with open(link_file) as f:
 		for line in f:
 			curr_link = Link(line)
 			all_links.append(curr_link)
+
+	prev_probe = None
+	with open(probe_file) as f:
+		count = 0
+		for line in f:
+			if count>100:
+				break
+			curr_probe = Probe(line)
+			print count,
+			get_candidates(curr_probe, all_links, 100)		
+			all_probes.append(curr_probe)
+			count += 1
+			if not prev_probe: # the first probe point in the data set
+				min_dist = 1000000000000
+				for grep in curr_probe.grepPoints:
+					dist = grep[0]
+					if dist < min_dist:
+						min_dist = dist
+						curr_probe.bestGrep = (grep[2], grep[3])
+						curr_probe.linkPVID = grep[4]
+			else: #prev_probe exists
+				prev_probe_grep = prev_probe.bestGrep
+				best_result = -1000000000000
+				for grep in curr_probe.grepPoints:
+					norm_prob = grep[1]
+					grep_pos = (grep[2], grep[3])
+					delta_d = haversine(curr_probe.getPos(), prev_probe.getPos())*1000
+					delta_w = haversine(grep_pos, prev_probe.bestGrep)*1000
+					transm_prob = delta_d / delta_w
+					result = norm_prob * transm_prob
+					print "---",
+					print grep[0], 
+					print norm_prob, 
+					print transm_prob
+					if result > best_result:
+						curr_probe.bestGrep = (grep[2], grep[3])
+						curr_probe.linkPVID = grep[4]
+			print curr_probe.linkPVID
+			prev_probe = curr_probe
+
+
+			# if not prev_probe:
+			# 	probe.slope = 'X'
+			# elif probe.linkPVID != prev_probe.linkPVID:
+			# 	probe.slope = 'X'
+			# else:
+			# 	opposite = float(probe.altitude) - float(prev_probe.altitude)
+			# 	start = map(float, [probe.longitude, probe.latitude])
+			# 	end = map(float, [prev_probe.longitude, prev_probe.latitude])
+			# 	hypotenuse = haversine.haversine(start[0],start[1],end[0],end[1])/1000
+			# 	probe.slope = math.atan(opposite/hypotenuse)
+			# 	probe.slope = (2*math.pi*probe.slope)/360	
+
+
 						
-	print(all_links[0].RefNode[0])
+	
+
+
+
+
+
+
+

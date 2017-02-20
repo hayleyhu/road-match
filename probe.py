@@ -1,3 +1,5 @@
+from haversine import haversine
+
 class Probe(object):
 	def __init__(self, line):
 		'''
@@ -17,8 +19,25 @@ class Probe(object):
 		self.longitude   ,\
 		self.altitude    ,\
 		self.speed       ,\
-		self.heading     ,\
-		self.linkPVID    ,\
-		self.direction   ,\
-		self.distFromRef ,\
-		self.distFromLink = line.split(',')
+		self.heading     = line.split(',')
+		self.linkPVID = None
+		self.direction = None
+		self.distFromRef = None
+		self.distFromLink = None
+		self.grepPoints = list()
+		self.bestGrep = None
+
+	def getPos(self):
+		return map(float, (self.latitude, self.longitude))
+
+
+	# def distToLink(self, link):
+	# 	min_dist = haversine(self.getPos(), link.RefNode)
+	# 	for node in link.allNodes[1:]:
+	# 		X2, Y2 = node[0], node[1]
+	# 		dist = haversine(self.getPos, (X2, Y2))
+	# 		if dist < min_dist:
+	# 			min_dist = dist
+
+	# 	return min_dist*1000
+

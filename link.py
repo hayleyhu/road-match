@@ -1,3 +1,6 @@
+from math import sin, cos, atan2, sqrt, degrees, radians, pi
+from geopy.point import Point
+
 class Link(object):
 	def __init__(self, line):
 		'''
@@ -38,5 +41,50 @@ class Link(object):
 		self.slopeInfo		  = line.strip().split(',')
 		self.RefNodeLat,self.RefNodeLong,_  = self.shapeInfo.split('|')[0].split('/')
 		self.RefNode = map(float, (self.RefNodeLat,self.RefNodeLong))
-		self.NrefNodeLat,self.NrefNodeLong,_  = self.shapeInfo.split('|')[0].split('/')
-		self.NrefNode = map(float, (self.NrefNodeLat,self.NrefNodeLong))
+		self.allNodes = self.getAllNodes()
+
+		# Returns lat longs and elevations associated with edges of the link		
+	def getAllNodes(self):
+		'''
+			51.4965800/9.3862299/|51.4966899/9.3867100/|51.4968000/9.3873199/|51.4970100/9.3880399/,,
+		'''
+		nodes = self.shapeInfo.split("|")   
+		all_nodes = []
+		for n in nodes:
+			lat1, lon1, elev1 = n.split('/')
+			all_nodes.append([float(lat1), float(lon1)])
+		return all_nodes
+	
+	def pointToLink(self, point):
+		x3, y3 = point.getPos()
+		min_dist2edge = 100000000000
+		x4, y4 = None, None
+		for i in range(len(self.allNodes)-1):
+			x1= self.allNodes[i][0]
+			y1 = self.allNodes[i][1]
+			x2 = self.allNodes[i+1][0]
+			y2 = self.allNodes[i+1][1]
+			xx = x2-x1
+			yy = y2-y1
+			denom = ((xx * xx) + (yy * yy)) 
+			if denom == 0:
+				print self.linkPVID,
+				print "error line segment has zero length"
+			dist2edge = abs((xx*(x3-x1) + yy*(y3-y1))/denom)*10000
+			if dist2edge < min_dist2edge:
+				min_dist2edge = dist2edge
+				x4 = x1 + xx * dist2edge
+				y4 = y1 + yy * dist2edge
+		return min_dist2edge, x4, y4, self.linkPVID
+			# 	ShortestLength = ((XX * (X3 - X1)) + (YY * (Y3 - Y1))) / denom
+	# 	X4 = X1 + XX * ShortestLength 
+	# 	Y4 = Y1 + YY * ShortestLength
+	# 	if X4 < X2 and X4 > X1 and Y4 < Y2 and Y4 > Y1:
+	# 		return haversine((X3, Y3), (X4, Y4))*1000
+	# 	return min(haversine((X3, Y3), (X1, Y1)), haversine((X3, Y3), (X2, Y2)))*1000
+
+
+
+
+
+
