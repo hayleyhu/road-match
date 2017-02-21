@@ -31,13 +31,23 @@ class Probe(object):
 		return map(float, (self.latitude, self.longitude))
 
 
-	# def distToLink(self, link):
-	# 	min_dist = haversine(self.getPos(), link.RefNode)
-	# 	for node in link.allNodes[1:]:
-	# 		X2, Y2 = node[0], node[1]
-	# 		dist = haversine(self.getPos, (X2, Y2))
-	# 		if dist < min_dist:
-	# 			min_dist = dist
+class Probe2(object):
+	def __init__(self, line1, line2):
+		self.sampleID    ,\
+		self.dateTime    ,\
+		self.sourceCode  ,\
+		self.latitude    ,\
+		self.longitude   ,\
+		self.altitude    ,\
+		self.speed       ,\
+		self.heading     = line1.split(',')
+		_, self.linkPVID ,\
+		self.direction 	 ,\
+		self.distFromRef ,\
+		self.distFromLink = line2.split(',')
+		print self.sampleID,
+		print self.linkPVID
 
-	# 	return min_dist*1000
+	def getPos(self):
+		return map(float, (self.latitude, self.longitude))
 

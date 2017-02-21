@@ -42,6 +42,10 @@ class Link(object):
 		self.RefNodeLat,self.RefNodeLong,_  = self.shapeInfo.split('|')[0].split('/')
 		self.RefNode = map(float, (self.RefNodeLat,self.RefNodeLong))
 		self.allNodes = self.getAllNodes()
+		self.probePoint = list()
+		self.expSlopeSum = 0
+		self.numProbe = 0
+		print self.linkPVID
 
 		# Returns lat longs and elevations associated with edges of the link		
 	def getAllNodes(self):
@@ -70,7 +74,7 @@ class Link(object):
 			if denom == 0:
 				print self.linkPVID,
 				print "error line segment has zero length"
-			dist2edge = abs((xx*(x3-x1) + yy*(y3-y1))/denom)*10000
+			dist2edge = abs((xx*(x3-x1) + yy*(y3-y1))/denom)*1000
 			if dist2edge < min_dist2edge:
 				min_dist2edge = dist2edge
 				x4 = x1 + xx * dist2edge
