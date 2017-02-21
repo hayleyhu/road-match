@@ -1,10 +1,11 @@
-from math import sin, cos, atan2, sqrt, degrees, radians, pi
 from geopy.point import Point
-import sys
+from haversine import haversine
+import math
 
 class Link(object):
 	def __init__(self, line):
 		'''
+		LinkData Record Format:
 			linkPVID		is the published versioned identifier for the link.
 			refNodeID		is the internal identifier for the link's reference node.
 			nrefNodeID		is the internal identifier for the link's non-reference node.
@@ -46,13 +47,14 @@ class Link(object):
 		self.probePoint = list()
 		self.numProbe = 0
 		self.closestP = None
-		self.closestDist = sys.maxint
+		self.closestDist = 100000000000
 		self.farthestP = None
 		self.farthestDist = 0
 
 		# Returns lat longs and elevations associated with edges of the link		
 	def getAllNodes(self):
 		'''
+		Reference Nodes Info example:
 			51.4965800/9.3862299/|51.4966899/9.3867100/|51.4968000/9.3873199/|51.4970100/9.3880399/,,
 		'''
 		nodes = self.shapeInfo.split("|")   
@@ -90,14 +92,14 @@ class Link(object):
 			tan(theta) = height/length
 			theta = arctan(height/length)
 		"""
-
 			# if probe.direction == "T":
 			# 	exp_slope = - exp_slope
 		lat1, long1, alt1 = self.closestP
 		lat2, long2, alt2 = self.farthestP
 		vertical = alt2 - alt1
-		horizontal = haversine.haversine(lat1, long1, lat2, long2)*1000
+		horizontal = haversine((lat1, long1), (lat2, long2))*1000
 		exp_slope = math.degrees(math.atan(vertical/horizontal))
+		return exp_slope
 
 
 

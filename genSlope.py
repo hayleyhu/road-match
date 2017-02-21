@@ -43,6 +43,7 @@ if __name__=="__main__":
 			# 	exp_slope = - exp_slope
 			for link in all_links:
 				if link.linkPVID == probe.linkPVID:
+					probe.distFromRef = float(probe.distFromRef)
 					if probe.distFromRef < link.closestDist:
 						link.closestDist = probe.distFromRef
 						link.closestP = map(float, (probe.latitude, probe.longitude, probe.altitude))
@@ -69,15 +70,25 @@ if __name__=="__main__":
 			probeSlope = link.expSlope()
 			"""
 			Link data contains slopes for several reference nodes. The average of all provided slopes serves as refSlope.
+			slope_info example: 20.65/-0.000195|75.11/0.001237
 			"""
+			if len(link.slopeInfo) == 0:
+				# print link.linkPVID,
+				# print "has no slope info"
+				continue
 			slope_info = link.slopeInfo.strip().split('|')
 			ref_slope_sum = 0
 			for si in slope_info:
-				ref_slope_sum += float(si.strip().split('/')[1])
+				si = si.strip().split('/')
+				if len(si)<2:
+					print link.linkPVID,
+					print "slope_info format is wierd",
+					print slope_info
+				ref_slope_sum += float(si[1])
 			refSlope = ref_slope_sum/len(slope_info)
 			diff = refSlope - probeSlope
 			result = "%s, %f, %f, %f\n" %(link.linkPVID, refSlope, probeSlope, diff)
-			print result
+			# print result
 			slopef.write(result)
 	slopef.close()
 			

@@ -3,6 +3,7 @@ from haversine import haversine
 class Probe(object):
 	def __init__(self, line):
 		'''
+		ProbePoints Record Format:
 			sampleID	is a unique identifier for the set of probe points that were collected from a particular phone.
 			dateTime	is the date and time that the probe point was collected.
 			sourceCode	is a unique identifier for the data supplier (13 = COMPANY).
@@ -41,6 +42,21 @@ class Probe(object):
 
 
 class Probe2(object):
+	'''
+	MatchedPoints Record Format:
+		sampleID	is a unique identifier for the set of probe points that were collected from a particular phone.
+		dateTime	is the date and time that the probe point was collected.
+		sourceCode	is a unique identifier for the data supplier (13 = Nokia).
+		latitude	is the latitude in decimal degrees.
+		longitude	is the longitude in decimal degrees.
+		altitude	is the altitude in meters.
+		speed		is the speed in KPH.
+		heading		is the heading in degrees.
+		linkPVID	is the published versioned identifier for the link.
+		direction	is the direction the vehicle was travelling on thelink (F = from ref node, T = towards ref node).
+		distFromRef	is the distance from the reference node to the map-matched probe point location on the link in decimal meters.
+		distFromLink	is the perpendicular distance from the map-matched probe point location on the link to the probe point in decimal meters.
+	'''
 	def __init__(self, line1, line2):
 		self.sampleID    ,\
 		self.dateTime    ,\
