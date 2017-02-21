@@ -1,5 +1,6 @@
 from math import sin, cos, atan2, sqrt, degrees, radians, pi
 from geopy.point import Point
+import sys
 
 class Link(object):
 	def __init__(self, line):
@@ -43,9 +44,11 @@ class Link(object):
 		self.RefNode = map(float, (self.RefNodeLat,self.RefNodeLong))
 		self.allNodes = self.getAllNodes()
 		self.probePoint = list()
-		self.expSlopeSum = 0
 		self.numProbe = 0
-		print self.linkPVID
+		self.closestP = None
+		self.closestDist = sys.maxint
+		self.farthestP = None
+		self.farthestDist = 0
 
 		# Returns lat longs and elevations associated with edges of the link		
 	def getAllNodes(self):
@@ -80,14 +83,21 @@ class Link(object):
 				x4 = x1 + xx * dist2edge
 				y4 = y1 + yy * dist2edge
 		return min_dist2edge, x4, y4, self.linkPVID
-			# 	ShortestLength = ((XX * (X3 - X1)) + (YY * (Y3 - Y1))) / denom
-	# 	X4 = X1 + XX * ShortestLength 
-	# 	Y4 = Y1 + YY * ShortestLength
-	# 	if X4 < X2 and X4 > X1 and Y4 < Y2 and Y4 > Y1:
-	# 		return haversine((X3, Y3), (X4, Y4))*1000
-	# 	return min(haversine((X3, Y3), (X1, Y1)), haversine((X3, Y3), (X2, Y2)))*1000
 
+	def expSlope(self):
+		"""
+		Slope Calcuation Formula:
+			tan(theta) = height/length
+			theta = arctan(height/length)
+		"""
 
+			# if probe.direction == "T":
+			# 	exp_slope = - exp_slope
+		lat1, long1, alt1 = self.closestP
+		lat2, long2, alt2 = self.farthestP
+		vertical = alt2 - alt1
+		horizontal = haversine.haversine(lat1, long1, lat2, long2)*1000
+		exp_slope = math.degrees(math.atan(vertical/horizontal))
 
 
 

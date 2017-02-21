@@ -76,7 +76,8 @@ if __name__ == "__main__":
 				if link.linkPVID == curr_probe.linkPVID:
 					curr_probe.linkPVID = link.linkPVID
 					curr_probe.direction = link.directionOfTravel
-					curr_probe.distFromRef = haversine(curr_probe.getPos(), link.RefNode)*1000
+					curr_probe.distFromRef = haversine(curr_probe.getPos(), link.RefNode)
+					break
 
 			data = curr_probe.sampleID+","+curr_probe.dateTime+","+curr_probe.sourceCode+","+curr_probe.latitude+","
 			data += curr_probe.longitude+","+curr_probe.altitude+","+curr_probe.speed+","+curr_probe.heading+","

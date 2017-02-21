@@ -24,6 +24,15 @@ class Probe(object):
 		self.direction = None
 		self.distFromRef = None
 		self.distFromLink = None
+		'''
+			grepPoints are the end on the link egde of the line segment that defines shortest distance between a point and the linkPVID
+			--------c-----  l
+					|
+					|
+					P
+			For example, the distance between P to l is defined by the distance of cP, so c is one grep point
+			bestGrep are selected based on both geometric and topological information
+		'''
 		self.grepPoints = list()
 		self.bestGrep = None
 
@@ -45,8 +54,6 @@ class Probe2(object):
 		self.direction 	 ,\
 		self.distFromRef ,\
 		self.distFromLink = line2.split(',')
-		print self.sampleID,
-		print self.linkPVID
 
 	def getPos(self):
 		return map(float, (self.latitude, self.longitude))
