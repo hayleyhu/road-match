@@ -38,8 +38,8 @@ if __name__ == "__main__":
 	all_links = list()
 	all_probes = list()
 	link_file = "Partition6467LinkData.csv"
-	probe_file = "Partition6467ProbePoints2.csv"
-	match_outfile = "MatchedPointsOutput2.csv"
+	probe_file = "Partition6467ProbePoints.csv"
+	match_outfile = "MatchedPointsOutput.csv"
 
 	with open(link_file) as f:
 		for line in f:

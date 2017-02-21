@@ -42,7 +42,12 @@ if __name__=="__main__":
 			# if probe.direction == "T":
 			# 	exp_slope = - exp_slope
 			for link in all_links:
+				if len(link.slopeInfo) == 0:
+				# print link.linkPVID,
+				# print "has no slope info"
+					continue
 				if link.linkPVID == probe.linkPVID:
+
 					probe.distFromRef = float(probe.distFromRef)
 					if probe.distFromRef < link.closestDist:
 						link.closestDist = probe.distFromRef
@@ -55,11 +60,19 @@ if __name__=="__main__":
 					break
 	
 	slope_outfile = "slopeAnalysis.csv"
+	# clear the any previous data in the file
+	slopef = open(slope_outfile,'w')
+	slopef.close()
+
 	slopef = open(slope_outfile, "w+")
 	header = "linkPVID, refSlope, probeSlope, diff\n"
 	slopef.write(header)
 	print "Iterating all the links..."
 	for link in all_links:
+		if len(link.slopeInfo) == 0:
+				# print link.linkPVID,
+				# print "has no slope info"
+				continue
 		if link.numProbe > 1:
 			if (not link.closestP) or (not link.farthestP):
 				print link.linkPVID,
@@ -72,10 +85,7 @@ if __name__=="__main__":
 			Link data contains slopes for several reference nodes. The average of all provided slopes serves as refSlope.
 			slope_info example: 20.65/-0.000195|75.11/0.001237
 			"""
-			if len(link.slopeInfo) == 0:
-				# print link.linkPVID,
-				# print "has no slope info"
-				continue
+			
 			slope_info = link.slopeInfo.strip().split('|')
 			ref_slope_sum = 0
 			for si in slope_info:
